@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import ProductService from "../services/productService";
 import CategoryService from "../services/categoryService";
 import cartService from "../services/cartService";
-import wishListService from "../services/wishListService";
+import wishListService from "../services/wishlistService";
 import { getUserId, isLoggedIn } from "../services/AuthHelper";
 import Swal from "sweetalert2";
 
