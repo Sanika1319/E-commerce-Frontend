@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import OrderService from "../services/orderService";
 import UserService from "../services/userService";
 import AddressService from "../services/AddressService";
+import orderService from "../services/OrderService";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const ProfilePage = () => {
 
   const loadOrders = async (userId) => {
     try {
-      const data = await OrderService.getOrdersByUser(userId);
+      const data = await orderService.getOrdersByUser(userId);
       setOrders(data);
     } catch (err) {
       console.error(err);

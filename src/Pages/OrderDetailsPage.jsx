@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import orderService from "../services/orderService";
+import orderService from "../services/OrderService";
+
 
 
 const OrderDetailsPage = () => {
