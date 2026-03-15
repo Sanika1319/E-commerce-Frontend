@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import OrderService from "../services/OrderService";
+import orderService from "../services/orderService";
+
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
@@ -15,7 +16,7 @@ const OrderDetailsPage = () => {
 
   const fetchOrder = async () => {
     try {
-      const data = await OrderService.getOrderById(id);
+      const data = await orderService.getOrderById(id);
       setOrder(data);
     } catch (error) {
       console.error("Error fetching order:", error);

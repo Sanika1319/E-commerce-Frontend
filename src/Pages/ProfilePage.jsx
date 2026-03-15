@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import OrderService from "../services/OrderService";
+import OrderService from "../services/orderService";
 import UserService from "../services/userService";
 import AddressService from "../services/AddressService";
 
