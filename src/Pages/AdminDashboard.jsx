@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import CategoryService from "../services/categoryService";
 import productService from "../services/productService";
-import orderService from "../services/orderService";
+import categoryService from "../services/categoryService";
+import orderService from '../services/orderService';
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
 
   // Load Categories
   const loadCategories = async () => {
-    const data = await CategoryService.getAllCategories();
+    const data = await categoryService.getAllCategories();
     console.log("Categories:", data);
     setCategories(data);
   };
@@ -73,7 +73,7 @@ const AdminDashboard = () => {
 
   // activate category
   const activateCategory = async (id) => {
-    await CategoryService.activateCategory(id);
+    await categoryService.activateCategory(id);
     alert("Category activated");
     loadCategories();
   };
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      await CategoryService.createCategory(category);
+      await categoryService.createCategory(category);
 
       // alert("Category created successfully");
       Swal.fire({
@@ -125,7 +125,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    await CategoryService.deactivateCategory(oldCategory, newCategory);
+    await categoryService.deactivateCategory(oldCategory, newCategory);
 
     alert("Category deactivated and products moved");
 
