@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = "https://pacific-unity-production.up.railway.app"; //base url
-// const BASE_URL = "http://localhost:8080"
+
 // object AXIOS
 const api = axios.create({
   baseURL: BASE_URL,
@@ -60,17 +60,13 @@ const authService ={
  register: async (name, email, password) => {
   try {
     const payload = {
-      user: {
-        name,
-        email,
-        password
-      },
-      
+      name,
+      email,
+      password
     };
 
-    
-
     const response = await api.post(`/auth/register`, payload);
+    console.log(response.data, "from Service")
     return response.data;
 
   } catch (error) {
@@ -79,36 +75,34 @@ const authService ={
   }
 },
 
+
+
    //  Login
   login: async (email, password) => {
-  localStorage.removeItem("token");
+    localStorage.removeItem("token");
+    try {
+      const response = await  api.post("/auth/login", {
+         email,
+         password,
+      });
+    
+      const token = response.data;
+     
 
-  try {
-    const response = await api.post("/auth/login", {
-      email,
-      password,
-    });
+      //  store token
 
-    const token = response.data;
+      localStorage.setItem("token", token);
 
-    // ✅ store token
-    localStorage.setItem("token", token);
+      // return
 
-    // ✅ VERY IMPORTANT: fetch current user immediately
-    const userResponse = await api.get("/user/currentUser");
-
-    localStorage.setItem("user", JSON.stringify(userResponse.data));
-
-    return {
-      token: token,
-      user: userResponse.data,
-    };
-
-  } catch (error) {
-    console.error("Fail to login ", error);
-    throw error;
-  }
-},
+      return {
+        token: token,
+      };
+    } catch (error) {
+      console.error("Fail to login ", error);
+      throw error;
+    }
+  },
   currentUser: async()=>{
     try {
        const response = await api.get(`/user/currentUser`);
@@ -123,10 +117,9 @@ const authService ={
 
     }
   },
- logout: () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-}
+  logout:()=>{
+    localStorage.removeItem('token')
+  }
 }
 
 export { api, authService };

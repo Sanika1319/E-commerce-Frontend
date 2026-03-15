@@ -72,7 +72,9 @@ function Register() {
         formData.email,
         formData.password,
         
+        
       );
+      console.log(formData)
 
       // Success Popup
       Swal.fire({
