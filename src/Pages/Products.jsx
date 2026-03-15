@@ -5,8 +5,8 @@ import wishListService from "../services/wishlistService";
 import { getUserId, isLoggedIn } from "../services/AuthHelper";
 import Swal from "sweetalert2";
 import cartService from "../services/cartService";
-import categoryService from "../services/CategoryService";
-import productService from "../services/ProductService";
+import categoryService from "../services/categoryService";
+import productService from "../services/productService";
 
 
 

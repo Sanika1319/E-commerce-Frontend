@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import CategoryService from "../services/CategoryService";
-import productService from "../services/ProductService";
-import orderService from "../services/OrderService";
+import CategoryService from "../services/categoryService";
+import productService from "../services/productService";
+import orderService from "../services/orderService";
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
