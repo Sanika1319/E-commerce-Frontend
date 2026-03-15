@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ProductService from "../services/productService";
-import CategoryService from "../services/categoryService";
-import cartService from "../services/cartService";
+import ProductService from "../services/ProductService";
+import CategoryService from "../services/CategoryService";
+
 import wishListService from "../services/wishlistService";
 import { getUserId, isLoggedIn } from "../services/AuthHelper";
 import Swal from "sweetalert2";
+import cartService from "../services/cartService";
 
 function Products() {
   const [products, setProducts] = useState([]);

@@ -1,4 +1,4 @@
-import { api } from "./authService";
+import { api } from "./AuthService";
 
 const BASE_URL = "/product";
 
