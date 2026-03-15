@@ -45,6 +45,7 @@ const AdminDashboard = () => {
 
   // Load Orders
   const loadOrders = async () => {
+    // const data = await orderService.getAllOrders();
     const data = await orderService.getAllOrders();
     setOrders(data);
   };
