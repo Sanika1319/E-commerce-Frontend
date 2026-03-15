@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://pacific-unity-production.up.railway.app/"; //base url
+const BASE_URL = "https://pacific-unity-production.up.railway.app"; //base url
 
 // object AXIOS
 const api = axios.create({

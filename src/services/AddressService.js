@@ -1,5 +1,5 @@
 // src/services/AddressService.js
-import { api } from "./AuthService";
+import { api } from "./authService";
 
 
 const AddressService = {

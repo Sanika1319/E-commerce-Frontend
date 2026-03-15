@@ -1,5 +1,5 @@
 // wishListService.js
-import { api } from "./AuthService"; // using your auth-enabled axios instance
+import { api } from "./authService"; // using your auth-enabled axios instance
 import { getUserId } from "./AuthHelper";
 
 const BASE_URL = "/wishList";
