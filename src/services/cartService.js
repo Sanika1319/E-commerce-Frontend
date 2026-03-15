@@ -1,11 +1,12 @@
-import axiosInstance from "./axiosInstance"
+import { api } from "./authService";
+
 
 const cartService ={
     getCart: (userId) =>{
-        return axiosInstance.get(`/cart/getCartByUserId/${userId}`)
+        return api.get(`/cart/getCartByUserId/${userId}`)
     },
     addToCart : (userId, productId, quantity) =>{
-        return axiosInstance.post(`/cart/addProducts/${userId}/${productId}`
+        return api.post(`/cart/addProducts/${userId}/${productId}`
             ,
       null,
       { params: { quantity } }
@@ -13,11 +14,11 @@ const cartService ={
     },
 
     removeFromCart: (userId, productId) => {
-    return axiosInstance.delete(`/cart/removeProductFromCart/${userId}/${productId}`);
+    return api.delete(`/cart/removeProductFromCart/${userId}/${productId}`);
   },
 
   clearCart: (userId) => {
-    return axiosInstance.delete(`/cart/clearCart/${userId}`);
+    return api.delete(`/cart/clearCart/${userId}`);
   },
 
 };

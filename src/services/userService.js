@@ -1,4 +1,5 @@
-import axiosInstance from "./axiosInstance";
+import { api } from "./authService";
+
 const USER_BASE_URL = "/user";
 
 const UserService = {
@@ -6,7 +7,7 @@ const UserService = {
   // 1️⃣ Get All Users (ADMIN)
   getAllUsers: async () => {
     try {
-      const response = await axiosInstance.get(
+      const response = await api.get(
         `${USER_BASE_URL}/admin/getAllUsers`
       );
       return response.data;
@@ -19,7 +20,7 @@ const UserService = {
   // 2️⃣ Get User By ID
   getUserById: async (userId) => {
     try {
-      const response = await axiosInstance.get(
+      const response = await api.get(
         `${USER_BASE_URL}/getUserById/${userId}`
       );
       return response.data;
@@ -32,7 +33,7 @@ const UserService = {
   // 3️⃣ Get User By Email
   getUserByEmail: async (email) => {
     try {
-      const response = await axiosInstance.get(
+      const response = await api.get(
         `${USER_BASE_URL}/getUserByEmail?email=${email}`
       );
       return response.data;
@@ -45,7 +46,7 @@ const UserService = {
   // 4️⃣ Delete User (ADMIN)
   deleteUser: async (userId) => {
     try {
-      const response = await axiosInstance.delete(
+      const response = await api.delete(
         `${USER_BASE_URL}/admin/deleteUser/${userId}`
       );
       return response.data;
@@ -58,7 +59,7 @@ const UserService = {
   // 5️⃣ Get Currently Logged-in User
   getCurrentUser: async () => {
     try {
-      const response = await axiosInstance.get(
+      const response = await api.get(
         `${USER_BASE_URL}/currentUser`
       );
       return response.data;

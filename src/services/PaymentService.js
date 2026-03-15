@@ -1,15 +1,15 @@
-import axiosInstance from "./axiosInstance";
+import { api } from "./authService";
 
 const PaymentService = {
 
   // 1️⃣ Create Razorpay Order
   createOrder: async (userId) => {
-    return await axiosInstance.post(`/Orders/createOrder/${userId}`);
+    return await api.post(`/Orders/createOrder/${userId}`);
   },
 
   // 2️⃣ Verify Payment
   verifyPayment: async (orderId, paymentData) => {
-    return await axiosInstance.post("/Orders/verify", null, {
+    return await api.post("/Orders/verify", null, {
       params: {
         orderId: orderId,
         razorpayPaymentId: paymentData.razorpay_payment_id,

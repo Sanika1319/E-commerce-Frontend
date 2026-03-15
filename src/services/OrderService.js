@@ -1,4 +1,5 @@
-import axiosInstance from "./axiosInstance";
+import { api } from "./authService";
+
 
 const ORDER_BASE_URL = "/Orders";
 
@@ -6,7 +7,7 @@ const OrderService = {
 
   // Get all orders (admin)
   getAllOrders: async () => {
-    const res = await axiosInstance.get(
+    const res = await api.get(
       `${ORDER_BASE_URL}/allOrders`
     );
     return res.data;
@@ -14,7 +15,7 @@ const OrderService = {
 
   // Get orders by user
   getOrdersByUser: async (userId) => {
-    const res = await axiosInstance.get(
+    const res = await api.get(
       `${ORDER_BASE_URL}/user/${userId}`
     );
     return res.data;
@@ -22,7 +23,7 @@ const OrderService = {
 
   // Get single order
   getOrderById: async (orderId) => {
-    const res = await axiosInstance.get(
+    const res = await api.get(
       `${ORDER_BASE_URL}/${orderId}`
     );
     return res.data;
