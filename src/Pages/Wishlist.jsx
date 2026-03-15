@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import wishListService from "../services/wishListService";
+import wishListService from "../services/wishlistService";
 import Swal from "sweetalert2";
 
 const Wishlist = () => {
