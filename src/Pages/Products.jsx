@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ProductService from "../services/ProductService";
+
 import CategoryService from "../services/CategoryService";
 
 import wishListService from "../services/wishlistService";
 import { getUserId, isLoggedIn } from "../services/AuthHelper";
 import Swal from "sweetalert2";
 import cartService from "../services/cartService";
+import productService from "../services/ProductService";
+
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -31,9 +33,9 @@ function Products() {
 
         if (categoryName) {
           const cat = await CategoryService.getCategoryByName(categoryName);
-          data = await ProductService.getProductsByCategory(cat.categoryId);
+          data = await productService.getProductsByCategory(cat.categoryId);
         } else {
-          data = await ProductService.getAllProducts();
+          data = await productService.getAllProducts();
         }
 
         setProducts(data);
