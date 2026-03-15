@@ -1,6 +1,6 @@
 import { api } from "./authService";
 
-const CategoryService = {
+const categoryService = {
 
   createCategory: async (category) => {
     const res = await api.post("/category/addCategory", category);
@@ -39,4 +39,4 @@ const CategoryService = {
 
 };
 
-export default CategoryService;
+export default categoryService;

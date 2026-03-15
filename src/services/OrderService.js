@@ -4,7 +4,7 @@ import { api } from "./authService";
 
 const ORDER_BASE_URL = "/Orders";
 
-const OrderService = {
+const orderService = {
 
   // Get all orders (admin)
   getAllOrders: async () => {
@@ -31,4 +31,4 @@ const OrderService = {
   },
 };
 
-export default OrderService;
+export default orderService;

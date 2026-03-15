@@ -5,9 +5,9 @@ import wishListService from "../services/wishlistService";
 import { getUserId, isLoggedIn } from "../services/AuthHelper";
 import Swal from "sweetalert2";
 import cartService from "../services/cartService";
-
-import CategoryService from "../services/CategoryService";
+import categoryService from "../services/CategoryService";
 import productService from "../services/ProductService";
+
 
 
 function Products() {
@@ -32,7 +32,7 @@ function Products() {
         let data;
 
         if (categoryName) {
-          const cat = await CategoryService.getCategoryByName(categoryName);
+          const cat = await categoryService.getCategoryByName(categoryName);
           data = await productService.getProductsByCategory(cat.categoryId);
         } else {
           data = await productService.getAllProducts();
