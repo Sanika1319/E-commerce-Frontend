@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://pacific-unity-production.up.railway.app"; //base url
+const BASE_URL = "https://e-commerce-system-production-b11c.up.railway.app"; //base url
 // const BASE_URL = "http://localhost:8080"; //base url
 
 // object AXIOS
