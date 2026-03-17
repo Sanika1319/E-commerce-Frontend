@@ -3,13 +3,10 @@ import { api } from "./authService";
 const USER_BASE_URL = "/user";
 
 const UserService = {
-
   // 1️⃣ Get All Users (ADMIN)
   getAllUsers: async () => {
     try {
-      const response = await api.get(
-        `${USER_BASE_URL}/admin/getAllUsers`
-      );
+      const response = await api.get(`${USER_BASE_URL}/admin/getAllUsers`);
       return response.data;
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -20,9 +17,7 @@ const UserService = {
   // 2️⃣ Get User By ID
   getUserById: async (userId) => {
     try {
-      const response = await api.get(
-        `${USER_BASE_URL}/getUserById/${userId}`
-      );
+      const response = await api.get(`${USER_BASE_URL}/getUserById/${userId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching user by ID:", error);
@@ -34,7 +29,7 @@ const UserService = {
   getUserByEmail: async (email) => {
     try {
       const response = await api.get(
-        `${USER_BASE_URL}/getUserByEmail?email=${email}`
+        `${USER_BASE_URL}/getUserByEmail?email=${email}`,
       );
       return response.data;
     } catch (error) {
@@ -47,7 +42,7 @@ const UserService = {
   deleteUser: async (userId) => {
     try {
       const response = await api.delete(
-        `${USER_BASE_URL}/admin/deleteUser/${userId}`
+        `${USER_BASE_URL}/admin/deleteUser/${userId}`,
       );
       return response.data;
     } catch (error) {
@@ -56,12 +51,31 @@ const UserService = {
     }
   },
 
+  deactivateUser: async (userId) => {
+    try {
+      const response = await api.put(
+        `${USER_BASE_URL}/deactivateUser/${userId}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Fail to deactivate user");
+      throw error;
+    }
+  },
+  activateUser: async (userId) => {
+    try {
+      const response = await api.put(`${USER_BASE_URL}/activateUser/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Fail to activate user");
+      throw error;
+    }
+  },
+
   // 5️⃣ Get Currently Logged-in User
   getCurrentUser: async () => {
     try {
-      const response = await api.get(
-        `${USER_BASE_URL}/currentUser`
-      );
+      const response = await api.get(`${USER_BASE_URL}/currentUser`);
       return response.data;
     } catch (error) {
       console.error("Error fetching current user:", error);

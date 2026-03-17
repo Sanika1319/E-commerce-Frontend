@@ -6,9 +6,8 @@ import orderService from "../services/OrderService";
 import UserService from "../services/userService";
 
 
-
 const AdminDashboard = () => {
-   const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -45,14 +44,14 @@ const AdminDashboard = () => {
   // Load Users
 
   const loadUsers = async () => {
-  try {
-    const data = await UserService.getAllUsers();
-    console.log("Users:", data);
-    setUsers(data);
-  } catch (error) {
-    console.error("Error loading users:", error);
-  }
-};
+    try {
+      const data = await UserService.getAllUsers();
+      console.log("Users:", data);
+      setUsers(data);
+    } catch (error) {
+      console.error("Error loading users:", error);
+    }
+  };
 
   // Load Products
   const loadProducts = async () => {
@@ -79,25 +78,22 @@ const AdminDashboard = () => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  const deleteUser = async (userId) => {
-  const result = await Swal.fire({
-    title: "Delete User?",
-    text: "This user will be permanently deleted!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes Delete",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      await UserService.deleteUser(userId);
-      loadUsers();
-
-      Swal.fire("Deleted!", "User deleted successfully", "success");
-    } catch (error) {
-      console.error(error);
-      alert("Error deleting user");
+// Inside your AdminDashboard component
+const toggleUserStatus = async (userId, currentStatus) => {
+  try {
+    if (currentStatus === "ACTIVE") {
+      await UserService.deactivateUser(userId);
+      Swal.fire("Success", "User deactivated successfully", "success");
+    } else {
+      await UserService.activateUser(userId);
+      Swal.fire("Success", "User activated successfully", "success");
     }
+
+    // Refresh the users list
+    loadUsers(); // make sure you have a function to fetch all users
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong", "error");
+    console.error(error);
   }
 };
   // Category change
@@ -129,10 +125,10 @@ const AdminDashboard = () => {
 
       // alert("Category created successfully");
       Swal.fire({
-  icon: "success",
-  title: "Success",
-  text: "Category created successfully",
-});
+        icon: "success",
+        title: "Success",
+        text: "Category created successfully",
+      });
 
       setCategory({
         categoryName: "",
@@ -213,68 +209,66 @@ const AdminDashboard = () => {
   //   loadProducts();
   // };
   const deleteProduct = async (id) => {
+    const result = await Swal.fire({
+      title: "Delete Product?",
+      text: "This product will be deleted permanently!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes Delete",
+    });
 
-  const result = await Swal.fire({
-    title: "Delete Product?",
-    text: "This product will be deleted permanently!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes Delete",
-  });
+    if (result.isConfirmed) {
+      await productService.deleteProduct(id);
+      loadProducts();
 
-  if (result.isConfirmed) {
-    await productService.deleteProduct(id);
-    loadProducts();
-
-    Swal.fire("Deleted!", "Product deleted successfully", "success");
-  }
-
-};
+      Swal.fire("Deleted!", "Product deleted successfully", "success");
+    }
+  };
 
   // Edit Product
- const handleEdit = (p) => {
-  setEditingId(p.id);
+  const handleEdit = (p) => {
+    setEditingId(p.id);
 
-  setProduct({
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    imageUrl: p.imageUrl,
-    quantity: p.quantity,
-  });
+    setProduct({
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      imageUrl: p.imageUrl,
+      quantity: p.quantity,
+    });
 
-  setSelectedCategory(p.category ? p.category.id : "");
-};
+    setSelectedCategory(p.category ? p.category.id : "");
+  };
 
   // Update Product
   const updateProduct = async () => {
-  try {
-    const updatedProduct = {
-      ...product,
-      price: Number(product.price),
-      quantity: Number(product.quantity),
-    };
+    try {
+      const updatedProduct = {
+        ...product,
+        price: Number(product.price),
+        quantity: Number(product.quantity),
+      };
 
-    await productService.updateProduct(editingId, updatedProduct);
+      await productService.updateProduct(editingId, updatedProduct);
 
-    setEditingId(null);
+      setEditingId(null);
 
-    setProduct({
-      name: "",
-      description: "",
-      price: "",
-      imageUrl: "",
-      quantity: "",
-    });
+      setProduct({
+        name: "",
+        description: "",
+        price: "",
+        imageUrl: "",
+        quantity: "",
+      });
 
-    setSelectedCategory("");
+      setSelectedCategory("");
 
-    loadProducts();
-  } catch (error) {
-    console.error(error);
-    alert("Error updating product");
-  }
-};
+      loadProducts();
+    } catch (error) {
+      console.error(error);
+      alert("Error updating product");
+    }
+  };
 
   return (
     <div className="container-fluid">
@@ -495,48 +489,59 @@ const AdminDashboard = () => {
         </div>
 
         {/* USERS TABLE */}
-
-<div className="card shadow mt-4">
-  <div className="card-header bg-info text-white fw-bold">
-    All Users
-  </div>
-
-  <div className="table-responsive">
-    <table className="table table-striped">
-      <thead className="table-dark">
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {users.map((u) => (
-          <tr key={u.id}>
-            <td>{u.id}</td>
-            <td>{u.name}</td>
-            <td>{u.email}</td>
-            <td>
-              <span className="badge bg-primary">{u.role}</span>
-            </td>
-
-            <td>
-              <button
-                className="btn btn-sm btn-danger"
-                onClick={() => deleteUser(u.id)}
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div className="card shadow mb-4">
+          <div className="card-header bg-info text-white fw-bold">
+            All Users
+          </div>
+          <div className="table-responsive">
+            <table className="table table-striped">
+              <thead className="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.id}</td>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>{u.role}</td>
+                    <td>
+                      {u.status === "ACTIVE" ? (
+                        <span className="badge bg-success">ACTIVE</span>
+                      ) : (
+                        <span className="badge bg-danger">INACTIVE</span>
+                      )}
+                    </td>
+                    <td>
+                      {u.status === "ACTIVE" ? (
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => toggleUserStatus(u.id, u.status)}
+                        >
+                          Deactivate
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => toggleUserStatus(u.id, u.status)}
+                        >
+                          Activate
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* PRODUCT FORM */}
 
