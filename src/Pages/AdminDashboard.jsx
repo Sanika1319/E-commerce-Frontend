@@ -3,10 +3,12 @@ import Swal from "sweetalert2";
 import productService from "../services/productService";
 import categoryService from "../services/categoryService";
 import orderService from "../services/OrderService";
+import UserService from "../services/userService";
 
 
 
 const AdminDashboard = () => {
+   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -37,7 +39,20 @@ const AdminDashboard = () => {
     loadProducts();
     loadOrders();
     loadCategories();
+    loadUsers();
   }, []);
+
+  // Load Users
+
+  const loadUsers = async () => {
+  try {
+    const data = await UserService.getAllUsers();
+    console.log("Users:", data);
+    setUsers(data);
+  } catch (error) {
+    console.error("Error loading users:", error);
+  }
+};
 
   // Load Products
   const loadProducts = async () => {
@@ -64,6 +79,27 @@ const AdminDashboard = () => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
+  const deleteUser = async (userId) => {
+  const result = await Swal.fire({
+    title: "Delete User?",
+    text: "This user will be permanently deleted!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes Delete",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await UserService.deleteUser(userId);
+      loadUsers();
+
+      Swal.fire("Deleted!", "User deleted successfully", "success");
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting user");
+    }
+  }
+};
   // Category change
   const handleCategoryChange = (e) => {
     const { name, value } = e.target;
@@ -269,6 +305,15 @@ const AdminDashboard = () => {
           <div className="col-md-4">
             <div className="card text-center shadow">
               <div className="card-body">
+                <h5>Total Users</h5>
+                <h3>{users.length}</h3>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-md-4">
+            <div className="card text-center shadow">
+              <div className="card-body">
                 <h5>Total Categories</h5>
                 <h3>{categories.length}</h3>
               </div>
@@ -448,6 +493,50 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* USERS TABLE */}
+
+<div className="card shadow mt-4">
+  <div className="card-header bg-info text-white fw-bold">
+    All Users
+  </div>
+
+  <div className="table-responsive">
+    <table className="table table-striped">
+      <thead className="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {users.map((u) => (
+          <tr key={u.id}>
+            <td>{u.id}</td>
+            <td>{u.name}</td>
+            <td>{u.email}</td>
+            <td>
+              <span className="badge bg-primary">{u.role}</span>
+            </td>
+
+            <td>
+              <button
+                className="btn btn-sm btn-danger"
+                onClick={() => deleteUser(u.id)}
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
 
         {/* PRODUCT FORM */}
 

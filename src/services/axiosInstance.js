@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "https://pacific-unity-production.up.railway.app", 
-  // const BASE_URL = "http://localhost:8080"/
-  baseURL:"http://localhost:8080",
+  // const BASE_URL = "http://localhost:8080",
+  // baseURL:"http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },

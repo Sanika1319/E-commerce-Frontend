@@ -5,30 +5,83 @@ import OrderService from "../services/OrderService";
 const UserOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;  // ✅ FIXED
 
-  const fetchOrders = async () => {
+  // ============================
+  // FETCH ORDERS
+  // ============================
+ const fetchOrders = async () => {
+  try {
+    setLoading(true);
+
+    if (!userId) {
+      console.error("User ID missing!");
+      setOrders([]);
+      return;
+    }
+
+    const data = await OrderService.getOrdersByUser(userId);
+    console.log("Orders:", data); // 🔥 DEBUG
+
+    setOrders(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    setOrders([]); // prevent infinite loading
+  } finally {
+    setLoading(false); // ✅ ALWAYS stop loader
+  }
+};
+
+ useEffect(() => {
+  if (!userId) {
+    console.error("User ID is missing!");
+    setLoading(false);
+    return;
+  }
+
+  fetchOrders();
+}, [userId]);
+
+  // ============================
+  // CANCEL ORDER
+  // ============================
+  const handleCancel = async (orderId) => {
+    console.log("Cancel orderId:", orderId); // 🔥 ADD THIS
+    if (!window.confirm("Cancel this order?")) return;
+
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const data = await OrderService.getOrdersByUser(user.id);
-      setOrders(data);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+      setCancellingId(orderId);
+      await OrderService.cancelOrder(orderId);
+      await fetchOrders(); // refresh
+    } catch (err) {
+      console.error("Cancel failed:", err);
     } finally {
-      setLoading(false);
+      setCancellingId(null);
     }
   };
+
+  // ============================
+  // HELPERS
+  // ============================
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString() : "N/A";
+
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(amount);
 
   const getStatusBadge = (status) => {
     switch (status) {
       case "PLACED":
-        return "bg-primary";
-      case "SHIPPED":
         return "bg-warning text-dark";
+      case "ON_THE_WAY":
+        return "bg-info";
       case "DELIVERED":
         return "bg-success";
       case "CANCELLED":
@@ -38,92 +91,151 @@ const UserOrdersPage = () => {
     }
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(amount);
-  };
-
+  // ============================
+  // LOADING
+  // ============================
   if (loading) {
     return (
-      <div className="container mt-5 text-center">
-        <h4>Loading your orders...</h4>
+      <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+        <div className="spinner-border text-primary"></div>
       </div>
     );
   }
 
-  return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-center fw-bold">My Orders</h2>
+  // ============================
+  // EMPTY STATE
+  // ============================
+  if (orders.length === 0) {
+    return (
+      <div className="text-center mt-5">
+        <h4>No Orders Found 😕</h4>
+        <button
+          className="btn btn-dark mt-3"
+          onClick={() => navigate("/products")}
+        >
+          Start Shopping
+        </button>
+      </div>
+    );
+  }
 
-      {orders.length === 0 ? (
-        <div className="text-center mt-5">
-          <h5>No orders found</h5>
-          <button
-            className="btn btn-dark mt-3"
-            onClick={() => navigate("/products")}
-          >
-            Start Shopping
-          </button>
-        </div>
-      ) : (
-        <div className="row g-4">
-          {orders.map((order) => (
-            <div key={order.id} className="col-md-6 col-lg-4">
-              <div
-                className="card shadow-sm border-0 h-100"
-                style={{
-                  transition: "0.3s",
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate(`/orders/${order.id}`)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "translateY(-5px)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "translateY(0)")
-                }
-              >
-                <div className="card-body d-flex flex-column justify-content-between">
-                  
-                  <div>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <h5 className="mb-0">Order #{order.id}</h5>
-                      <span className={`badge ${getStatusBadge(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </div>
+  // ============================
+  // UI
+  // ============================
+ return (
+  <div className="container mt-5">
 
-                    <p className="text-muted mb-1">
-                      📅 {formatDate(order.date)}
-                    </p>
-
-                    <p className="fw-semibold mb-3">
-                      {formatCurrency(order.totalAmount)}
-                    </p>
-                  </div>
-
-                  <button className="btn btn-outline-dark btn-sm w-100">
-                    View Details
-                  </button>
-
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+    {/* HEADER */}
+    <div
+      className="text-center text-white py-4 mb-4"
+      style={{
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
+        borderRadius: "15px"
+      }}
+    >
+      <h2 className="fw-bold">My Orders 🛒</h2>
+      <p className="mb-0">Track and manage your purchases</p>
     </div>
-  );
+
+    {/* ORDERS GRID */}
+    <div className="row g-4">
+      {orders.map((order) => (
+        <div key={order.orderId} className="col-md-6 col-lg-4">
+
+          <div
+            className="card h-100 border-0 shadow-lg"
+            style={{
+              borderRadius: "18px",
+              transition: "all 0.3s ease",
+              overflow: "hidden"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px) scale(1.02)";
+              e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "";
+            }}
+          >
+
+            {/* CARD BODY */}
+            <div className="card-body d-flex flex-column justify-content-between">
+
+              {/* TOP */}
+              <div>
+
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="fw-bold text-dark">
+                    🧾 Order #{order.orderId}
+                  </h5>
+
+                  <span
+                    className={`badge px-3 py-2 ${getStatusBadge(order.status)}`}
+                    style={{ borderRadius: "20px", fontSize: "0.8rem" }}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+
+                {/* Divider */}
+                <hr style={{ opacity: 0.2 }} />
+
+                {/* DETAILS */}
+                <p className="text-muted mb-2">
+                  📅 <strong>Date:</strong> {formatDate(order.createdAt)}
+                </p>
+
+                <p className="mb-2 fs-5 fw-bold text-success">
+                  💰 {formatCurrency(order.totalAmount)}
+                </p>
+
+                <p className="text-muted small">
+                  📍 {order.deliveryAddress
+                    ? `${order.deliveryAddress.city}, ${order.deliveryAddress.state}`
+                    : "Address not available"}
+                </p>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="mt-3 d-flex gap-2">
+
+                <button
+                  className="btn btn-primary btn-sm w-100"
+                  style={{
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg, #36d1dc, #5b86e5)",
+                    border: "none"
+                  }}
+                  onClick={() => navigate(`/track-order/${order.id}`)}
+                >
+                  🚚 Track
+                </button>
+
+                {order.status === "PLACED" && (
+                  <button
+                    className="btn btn-outline-danger btn-sm w-100"
+                    style={{ borderRadius: "10px" }}
+                    onClick={() => handleCancel(order.id)}
+                    disabled={cancellingId === order.orderId}
+                  >
+                    {cancellingId === order.orderId
+                      ? "Cancelling..."
+                      : "❌ Cancel"}
+                  </button>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      ))}
+    </div>
+  </div>
+);
 };
 
 export default UserOrdersPage;

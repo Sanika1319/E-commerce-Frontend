@@ -83,61 +83,104 @@ const CartPage = () => {
     }
   };
 
-  // 🔥 RAZORPAY CHECKOUT
-  const handleCheckout = async () => {
-    try {
-      setProcessing(true);
+// 🔥 RAZORPAY CHECKOUT (FINAL VERSION)
+const handleCheckout = async () => {
+  try {
+    setProcessing(true);
 
-      const res = await PaymentService.createOrder(userId);
+    // 🔥 STEP 1: CREATE ORDER FROM BACKEND
+    const res = await PaymentService.createOrder(userId);
 
-      const backendOrderId = res.data.orderId;
-      const razorpayOrderId = res.data.razorpayOrderId;
-      const amount = res.data.amount;
-      const key = res.data.key;
+    console.log("CREATE ORDER RESPONSE:", res.data);
 
-      const options = {
-        key: key,
-        amount: amount,
-        currency: "INR",
-        name: "SmartBite",
-        description: "Order Payment",
-        order_id: razorpayOrderId,
+    // ✅ IMPORTANT: Use correct key from backend
+    const razorpayOrderId = res.data.razorpayOrderId || res.data.orderId;
 
-        handler: async function (response) {
-          try {
-            await PaymentService.verifyPayment(backendOrderId, response);
+    const amount = res.data.amount;
+    const key = res.data.key;
 
-            alert("Payment Successful 🎉");
-
-            await CartService.clearCart(userId); // ✅ clear cart after payment
-            await refresh();
-
-            navigate("/orders");
-          } catch (error) {
-            console.error("Verification failed", error);
-            alert("Payment verification failed ❌");
-          }
-        },
-
-        modal: {
-          ondismiss: function () {
-            setProcessing(false); // ✅ enable button again if user closes popup
-          },
-        },
-
-        theme: {
-          color: "#ffc107",
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
-    } catch (err) {
-      console.error("Payment failed", err);
-      alert("Unable to start payment");
+    // ❌ STOP if orderId missing
+    if (!razorpayOrderId) {
+      alert("Order creation failed ❌");
       setProcessing(false);
+      return;
     }
-  };
+
+    console.log("Razorpay Order ID:", razorpayOrderId);
+
+    // 🔥 STEP 2: CONFIGURE RAZORPAY
+    const options = {
+      key: key,
+      amount: amount,
+      currency: "INR",
+      name: "SmartBite",
+      description: "Order Payment",
+      order_id: razorpayOrderId,
+
+      // ✅ SUCCESS HANDLER
+      handler: async function (response) {
+        try {
+          console.log("RAZORPAY RESPONSE:", response);
+
+          const paymentData = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          };
+
+          // ❌ VALIDATION (VERY IMPORTANT)
+          if (
+            !paymentData.razorpay_order_id ||
+            !paymentData.razorpay_payment_id ||
+            !paymentData.razorpay_signature
+          ) {
+            console.error("Invalid payment response:", paymentData);
+            alert("Payment data incomplete ❌");
+            return;
+          }
+
+          console.log("Sending to backend:", paymentData);
+
+          // 🔥 STEP 3: VERIFY PAYMENT
+          await PaymentService.verifyPayment(userId, paymentData);
+
+          alert("Payment Successful 🎉");
+
+          // 🔥 STEP 4: CLEAR CART + REFRESH
+          await CartService.clearCart(userId);
+          await refresh();
+
+          navigate("/orders");
+        } catch (error) {
+          console.error("Verification failed:", error);
+          alert("Payment verification failed ❌");
+        }
+      },
+
+      // ❌ PAYMENT FAILED / CLOSED
+      modal: {
+        ondismiss: function () {
+          console.log("Payment popup closed");
+          setProcessing(false);
+        },
+      },
+
+      // 🎨 UI
+      theme: {
+        color: "#ffc107",
+      },
+    };
+
+    // 🔥 STEP 5: OPEN RAZORPAY
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+
+  } catch (err) {
+    console.error("Payment failed:", err);
+    alert("Unable to start payment ❌");
+    setProcessing(false);
+  }
+};
 
   if (loading) return <h3 style={{ textAlign: "center" }}>Loading...</h3>;
 
