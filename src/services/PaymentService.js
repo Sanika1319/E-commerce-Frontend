@@ -1,11 +1,38 @@
 import { api } from "./authService";
 
-const PaymentService = {
-  createOrder: (userId) =>
-    api.post(`/payment/create/${userId}`),
+const PAYMENT_BASE_URL = "/payment";
 
-  verifyPayment: (userId, payload) =>
-    api.post(`/payment/verify/${userId}`, payload),
+const PaymentService = {
+
+  // ============================
+  // CREATE RAZORPAY ORDER
+  // ============================
+  createOrder: async (userId) => {
+    try {
+      const res = await api.post(`${PAYMENT_BASE_URL}/create/${userId}`);
+      return res.data; // ✅ return only data
+    } catch (err) {
+      console.error("Create order error:", err);
+      throw err;
+    }
+  },
+
+  // ============================
+  // VERIFY PAYMENT
+  // ============================
+  verifyPayment: async (userId, payload) => {
+    try {
+      const res = await api.post(
+        `${PAYMENT_BASE_URL}/verify/${userId}`,
+        payload
+      );
+      return res.data; // ✅ return only data
+    } catch (err) {
+      console.error("Verify payment error:", err);
+      throw err;
+    }
+  },
+
 };
 
 export default PaymentService;

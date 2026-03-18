@@ -88,27 +88,26 @@ const handleCheckout = async () => {
   try {
     setProcessing(true);
 
-    // 🔥 STEP 1: CREATE ORDER FROM BACKEND
+    // ============================
+    // STEP 1: CREATE ORDER
+    // ============================
     const res = await PaymentService.createOrder(userId);
 
-    console.log("CREATE ORDER RESPONSE:", res.data);
+    console.log("CREATE ORDER RESPONSE:", res);
 
-    // ✅ IMPORTANT: Use correct key from backend
-    const razorpayOrderId = res.data.razorpayOrderId || res.data.orderId;
+    const razorpayOrderId = res?.orderId;
+    const amount = res?.amount;
+    const key = res?.key;
 
-    const amount = res.data.amount;
-    const key = res.data.key;
-
-    // ❌ STOP if orderId missing
-    if (!razorpayOrderId) {
+    if (!razorpayOrderId || !amount || !key) {
       alert("Order creation failed ❌");
       setProcessing(false);
       return;
     }
 
-    console.log("Razorpay Order ID:", razorpayOrderId);
-
-    // 🔥 STEP 2: CONFIGURE RAZORPAY
+    // ============================
+    // STEP 2: RAZORPAY OPTIONS
+    // ============================
     const options = {
       key: key,
       amount: amount,
@@ -123,56 +122,75 @@ const handleCheckout = async () => {
           console.log("RAZORPAY RESPONSE:", response);
 
           const paymentData = {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
+            razorpay_order_id: response?.razorpay_order_id,
+            razorpay_payment_id: response?.razorpay_payment_id,
+            razorpay_signature: response?.razorpay_signature,
           };
 
-          // ❌ VALIDATION (VERY IMPORTANT)
+          // ✅ VALIDATION
           if (
             !paymentData.razorpay_order_id ||
             !paymentData.razorpay_payment_id ||
             !paymentData.razorpay_signature
           ) {
-            console.error("Invalid payment response:", paymentData);
             alert("Payment data incomplete ❌");
+            setProcessing(false);
             return;
           }
 
-          console.log("Sending to backend:", paymentData);
-
-          // 🔥 STEP 3: VERIFY PAYMENT
+          // ============================
+          // STEP 3: VERIFY PAYMENT
+          // ============================
           await PaymentService.verifyPayment(userId, paymentData);
 
+          // ============================
+          // STEP 4: SUCCESS FLOW
+          // ============================
           alert("Payment Successful 🎉");
 
-          // 🔥 STEP 4: CLEAR CART + REFRESH
           await CartService.clearCart(userId);
           await refresh();
 
           navigate("/orders");
+
         } catch (error) {
           console.error("Verification failed:", error);
           alert("Payment verification failed ❌");
+        } finally {
+          setProcessing(false);
         }
       },
 
-      // ❌ PAYMENT FAILED / CLOSED
+      // ❌ USER CLOSED PAYMENT
       modal: {
         ondismiss: function () {
           console.log("Payment popup closed");
+          alert("Payment cancelled ❌");
           setProcessing(false);
         },
       },
 
-      // 🎨 UI
       theme: {
         color: "#ffc107",
       },
     };
 
-    // 🔥 STEP 5: OPEN RAZORPAY
+    // ============================
+    // STEP 5: OPEN RAZORPAY
+    // ============================
     const razorpay = new window.Razorpay(options);
+
+    // ❌ PAYMENT FAILED EVENT
+    razorpay.on("payment.failed", function (response) {
+      console.error("Payment Failed:", response.error);
+
+      alert(
+        `Payment Failed ❌\nReason: ${response.error.description || "Unknown"}`
+      );
+
+      setProcessing(false);
+    });
+
     razorpay.open();
 
   } catch (err) {
